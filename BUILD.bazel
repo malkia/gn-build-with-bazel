@@ -1,0 +1,34 @@
+cc_library(
+  name = "gn_lib",
+  srcs = glob(["**/*.cc", "**/*.h"], exclude=["base/win/**/*", "**/*win*", "**/*json_value*", "**/*_test.*", "**/*_unittest.*", "tools/gn/example/*", "tools/gn/gn_main.cc"]) + [ ":last_commit_position" ],
+  copts = [ "-std=c++17" ],
+)
+
+cc_binary(
+  name = "gn",
+  deps = [ ":gn_lib" ],
+  srcs = [ "tools/gn/gn_main.cc" ],
+  copts = [ "-std=c++17" ],
+  linkopts = [ "-lpthread" ],
+)
+
+py_binary(
+  name = "gen",
+  srcs = [ "build/gen.py" ],
+  data = glob(["build/build_*.template"]),
+  main = "build/gen.py",
+)
+
+genrule(
+  name = "last_commit_position",
+  tools = [ ":gen" ],
+  cmd = "$(location :gen) --no-sysroot --out-path $(@D)",
+  outs = [ "last_commit_position.h" ],
+  local = 1,
+)
+
+# ./bazel-out/host/bin/gen.runfiles/gn/out/last_commit_position.h
+# ./bazel-gn/bazel-out/host/bin/gen.runfiles/gn/out/last_commit_position.h
+
+# ./bazel-out/host/bin/gen.runfiles/gn/out/last_commit_position.h
+# ./bazel-gn/bazel-out/host/bin/gen.runfiles/gn/out/last_commit_position.h
